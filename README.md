@@ -24,6 +24,10 @@ _Hint:_
 
 This level is very similar to that of [Elevator](https://github.com/maAPPsDEV/elevator-attack) where you return different value everytime you call the function. The only problem now is the fact that you are only given 3k gas which is not enough to modify any state variables. Even if you wanted to, you can't because the interface requires a view function. Notice how there is actually a flag on the Shop contract that is being modified if it passes the first check? Yes the `isSold` variable! That is the variable that we will use to return different prices. Make sure you import the `Buyer` interface and `Shop` contract. Note that because of the Byzantine hardfork, this solution will actually fail because the `price()` function requires 3.8k gas but only 3k gas is given.
 
+### Game Fail
+
+The call still fails because `price()` uses more than the allotted 3000 gas. This [challenge was written a couple of years ago](https://github.com/OpenZeppelin/ethernaut/issues/156) and gas prices changed on a per instruction-level since then. This just shows how important it is to not assume anything about gas prices.
+
 ## Source Code
 
 ⚠️This contract contains a bug or risk. Do not use on mainnet!
@@ -32,23 +36,21 @@ This level is very similar to that of [Elevator](https://github.com/maAPPsDEV/el
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
-contract Token {
-  mapping(address => uint256) balances;
-  uint256 public totalSupply;
+interface Buyer {
+  function price() external view returns (uint256);
+}
 
-  constructor(uint256 _initialSupply) public {
-    balances[msg.sender] = totalSupply = _initialSupply;
-  }
+contract Shop {
+  uint256 public price = 100;
+  bool public isSold;
 
-  function transfer(address _to, uint256 _value) public returns (bool) {
-    require(balances[msg.sender] - _value >= 0);
-    balances[msg.sender] -= _value;
-    balances[_to] += _value;
-    return true;
-  }
+  function buy() public {
+    Buyer _buyer = Buyer(msg.sender);
 
-  function balanceOf(address _owner) public view returns (uint256 balance) {
-    return balances[_owner];
+    if (_buyer.price.gas(3000)() >= price && !isSold) {
+      isSold = true;
+      price = _buyer.price.gas(3000)();
+    }
   }
 }
 
@@ -91,9 +93,17 @@ Compiling your contracts...
 
 
   Contract: Hacker
-    √ should steal countless of tokens (377ms)
+    1) should get the item from the shop for less than the price asked
+    > No events were emitted
 
 
-  1 passing (440ms)
+  0 passing (2s)
+  1 failing
+
+  1) Contract: Hacker
+       should get the item from the shop for less than the price asked:
+     Error: Returned error: VM Exception while processing transaction: revert
+      at Context.<anonymous> (test\hacker.js:15:41)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
 
 ```
