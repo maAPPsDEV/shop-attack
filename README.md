@@ -22,7 +22,7 @@ _Hint:_
 
 ### Byzantine hardfork
 
-This level is very similar to that of [Elevator](https://github.com/maAPPsDEV/elevator-attack) where you return different value everytime you call the function. The only problem now is the fact that you are only given 3k gas which is not enough to modify any state variables. Even if you wanted to, you can't because the interface requires a view function. Notice how there is actually a flag on the Shop contract that is being modified if it passes the first check? Yes the `isSold` variable! That is the variable that we will use to return different prices. Make sure you import the `Buyer` interface and `Shop` contract. Note that because of the Byzantine hardfork, this solution will actually fail because the `price()` function requires 3.8k gas but only 3k gas is given.
+This game is very similar to that of [Elevator](https://github.com/maAPPsDEV/elevator-attack) where you return different value everytime you call the function. The only problem now is the fact that you are only given 3k gas which is not enough to modify any state variables. Even if you wanted to, you can't because the interface requires a view function. Notice how there is actually a flag on the Shop contract that is being modified if it passes the first check? Yes the `isSold` variable! That is the variable that we will use to return different prices. Make sure you import the `Buyer` interface and `Shop` contract. Note that because of the Byzantine hardfork, this solution will actually fail because the `price()` function requires 3.8k gas but only 3k gas is given.
 
 ### Game Fail
 
